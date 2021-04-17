@@ -23,7 +23,7 @@ class item {
     }
 }
 
-myCart = [new item(1, "Ford", 2, 10), new item(2, "mazda", 3, 100), new item(3, "Suzuki", 50, 2), new item(4, "Tata", 5, 10)];
+myCart = [];
 let sNum = myCart.length + 1;
 
 function render() {
