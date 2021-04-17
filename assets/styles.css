@@ -1,0 +1,51 @@
+.container {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #e8e8e4;
+}
+.wrapper {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.cart-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    border: 1px solid red;
+}
+.addition-form-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    border: 1px solid blue;
+}
+.cart {
+    width: fit-content;
+    height: fit-content;
+    background-color: #d8e2dc;
+}
+.addition-form {
+    width: fit-content;
+    height: fit-content;
+    background-color: #d8e2dc;
+}
+thead {
+    font-size: large;
+    font-weight: bolder;
+    text-align: center;
+}
+td {
+    padding: 10px;
+}
+#gt::before {
+    content: "Grand Total :- ";
+}
