@@ -1,67 +1,79 @@
 let gt = document.querySelector("#gt");
 let sum = 0;
 let sNum = 0;
+let myCart = {};
+let request = new XMLHttpRequest();
 
-class item {
-    constructor(sNum, name, quant, price) {
-        this.sNumber = sNum;
-        this.name = name;
-        this.quantity = quant;
-        this.price = price;
-        this.total = this.price*this.quantity;
-    }
-    add() {
-        this.quantity++ ;
-        this.total = this.price*this.quantity;
-        render();
-    }
-    sub() {
-        if(this.quantity>0){
-            this.quantity-- ;
-            this.total = this.price*this.quantity;
+function get() {
+    request.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            myCart = JSON.parse(this.response);
+            myCart.forEach(element => {
+                element.total = element.price*element.quantity;
+            });
+            for(i=0; i<myCart.length; i++) {
+                myCart[i].id = i+1;
+            }
             render();
+            document.querySelector(".btn").addEventListener("click", function(event){
+                // event.preventDefault();
+                event.stopPropagation();
+              });
         }
     }
+    request.open('get', 'http://localhost:3000/mycart');
+    request.send();
 }
-let myCart = [];
 
-let request = new XMLHttpRequest();
-request.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-        myCart = JSON.parse(this.response);
-        myCart.forEach(element => {
-            element.total = element.price*element.quantity;
-            element.add = function() {
-                this.quantity++ ;
-                this.total = this.price*this.quantity;
-                render();
-            }
-            element.sub = function() {
-                if(this.quantity>0){
-                    this.quantity-- ;
-                    this.total = this.price*this.quantity;
-                    render();
-                }
-            }
-        });
-        sNum = myCart.length + 1;
-        render();
+function post() {
+    let itemName = document.querySelector("#item-name").value;
+    let itemPrice = document.querySelector("#item-price").value;
+    let params = `name=${itemName}&price=${itemPrice}&quantity=1`;
+    request.open('post', 'http://localhost:3000/mycart');
+    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    request.send(params);
+}
+
+function del(id) {
+    let url = 'http://localhost:3000/mycart/'+id;
+    request.open('delete', url);
+    request.send(null);
+}
+
+function add(id) {
+    let data = {"name": myCart[id-1].name, "price": myCart[id-1].price};
+    data.quantity = Number(myCart[id-1].quantity) + 1;
+    let url = 'http://localhost:3000/mycart/'+id;;
+    let params = `name=${data.name}&price=${data.price}&quantity=${data.quantity}`;
+    request.open('put', url);
+    request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    request.send(params);
+}
+function sub(id) {
+    if(Number(myCart[id-1].quantity) > 0) {
+        let data = {"name": myCart[id-1].name, "price": myCart[id-1].price};
+        data.quantity = Number(myCart[id-1].quantity) - 1;
+        let url = 'http://localhost:3000/mycart/'+id;;
+        let params = `name=${data.name}&price=${data.price}&quantity=${data.quantity}`;
+        request.open('put', url);
+        request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        request.send(params);
     }
 }
-request.open('get', 'http://localhost:3000/mycart');
-request.send();
+
 
 function render() {
     document.querySelector("tbody").innerHTML = "";
     for(i=0; i<myCart.length; i++) {
         let tr = document.createElement("tr");
-        tr.innerHTML = `<td> ${myCart[i].sNumber} </td>
-                        <td> ${myCart[i].name} </td>
-                        <td> <button onclick="myCart[${i}].sub()"> - </button>
-                             ${myCart[i].quantity} <button onclick="myCart[${i}].add()"> + </button>
+        tr.innerHTML = `<td> ${myCart[i].id} </td>
+                        <td> ${myCart[i].name}</td>
+                        <td> <button type="button" class="btn" onclick="sub(${i+1})"> - </button>
+                             ${myCart[i].quantity} <button type="button" class="btn" onclick="add(${i+1})"> + </button>
                         </td>
                         <td> ${myCart[i].price} </td>
-                        <td> ${myCart[i].total} </td>`;
+                        <td> ${myCart[i].total} </td>
+                        <td> <button type="button" class="btn" onclick="del(${myCart[i].id})"> X </button> </td>`;
         document.querySelector("tbody").appendChild(tr);
     }
     gtotal();
@@ -69,20 +81,11 @@ function render() {
     sum = 0;
 }
 
-function submitBtn() {
-    let itemName = document.querySelector("#item-name").value;
-    let itemPrice = document.querySelector("#item-price").value;
-    myCart.push(new item(sNum, itemName, 1, itemPrice)); 
-    sNum++;
-    render();
-    document.querySelector("#item-name").value = "";
-    document.querySelector("#item-price").value = "";
-}
-
-
 function gtotal() {
     for(i=0; i<myCart.length; i++) {
         sum += myCart[i].total;
     }
     return sum;
 }
+
+get();
