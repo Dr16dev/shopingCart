@@ -1,5 +1,6 @@
 let gt = document.querySelector("#gt");
 let sum = 0;
+let sNum = 0;
 
 class item {
     constructor(sNum, name, quant, price) {
@@ -22,9 +23,33 @@ class item {
         }
     }
 }
+let myCart = [];
 
-myCart = [];
-let sNum = myCart.length + 1;
+let request = new XMLHttpRequest();
+request.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+        myCart = JSON.parse(this.response);
+        myCart.forEach(element => {
+            element.total = element.price*element.quantity;
+            element.add = function() {
+                this.quantity++ ;
+                this.total = this.price*this.quantity;
+                render();
+            }
+            element.sub = function() {
+                if(this.quantity>0){
+                    this.quantity-- ;
+                    this.total = this.price*this.quantity;
+                    render();
+                }
+            }
+        });
+        sNum = myCart.length + 1;
+        render();
+    }
+}
+request.open('get', 'http://localhost:3000/mycart');
+request.send();
 
 function render() {
     document.querySelector("tbody").innerHTML = "";
@@ -61,5 +86,3 @@ function gtotal() {
     }
     return sum;
 }
-
-render();
